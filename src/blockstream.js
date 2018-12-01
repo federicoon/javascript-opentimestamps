@@ -121,5 +121,6 @@ const publicBlockstreamUrls = {
 }
 
 module.exports = {
-  Blockstream
+  Blockstream,
+  publicBlockstreamUrls
 }
