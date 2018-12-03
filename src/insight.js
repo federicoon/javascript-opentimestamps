@@ -9,6 +9,7 @@
 
 const requestPromise = require('request-promise')
 const Promise = require('promise')
+const Blockstream = require('./blockstream.js')
 const Utils = require('./utils.js')
 
 /** Class used to query Insight API */
@@ -154,7 +155,16 @@ class MultiInsight {
     const urls = urlsOptionSet ? options.urls : publicInsightUrls[chain]
 
     urls.forEach(url => {
-      this.insights.push(new Insight(url, timeout))
+      if (typeof (url) !== 'string') {
+        throw new TypeError('URL must be a string')
+      }
+      var i
+      if (url === Blockstream.publicBlockstreamUrls.mainnet || url === Blockstream.publicBlockstreamUrls.testnet ) {
+        i = new Blockstream.BlockstreamExplorer(url, timeout)
+      } else {
+        i = new Insight(url, timeout)
+      }
+      this.insights.push(i)
     })
   }
 

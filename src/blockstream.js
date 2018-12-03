@@ -12,7 +12,7 @@ const Promise = require('promise')
 const Utils = require('./utils.js')
 
 /** Class used to query Blockstream API */
-class Blockstream {
+class BlockstreamExplorer {
   /**
    * Create a RemoteCalendar.
    * @param {int} timeout - timeout (in seconds) used for calls to Blockstream server
@@ -121,6 +121,6 @@ const publicBlockstreamUrls = {
 }
 
 module.exports = {
-  Blockstream,
+  BlockstreamExplorer,
   publicBlockstreamUrls
 }
