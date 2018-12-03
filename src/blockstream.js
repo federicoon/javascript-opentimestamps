@@ -66,7 +66,7 @@ class Blockstream {
             return
           }
 
-          resolve(body.id)
+          resolve(body)
         })
         .catch(err => {
           console.error('Blockstream response error: ' + err.toString().substr(0, 100))
