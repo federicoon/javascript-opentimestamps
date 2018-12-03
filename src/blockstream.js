@@ -60,7 +60,7 @@ class Blockstream {
       requestPromise(options)
         .then(body => {
           // console.log('body ', body);
-          if (body.size === 0) {
+          if (!body) {
             console.error('Blockstream response error body ')
             reject(new Error('Blockstream response error body '))
             return
@@ -102,7 +102,7 @@ class Blockstream {
             console.error('Blockstream response error body ')
             return reject(new Error('Blockstream response error body '))
           }
-          if (!body.merkleroot || !body.time) {
+          if (!body.merkle_root || !body.timestamp) {
             return reject(new Error('Blockstream response error body '))
           }
           resolve({merkleroot: body.merkle_root, time: body.timestamp})
