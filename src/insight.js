@@ -121,7 +121,7 @@ class Insight {
 }
 
 const publicInsightUrls = {}
-publicInsightUrls.bitcoin = [
+publicInsightUrls["bitcoin Mainnet"] = [
 //  'https://www.localbitcoinschain.com/api',  // gives 502 - "lots of HTML code"
 //  'https://search.bitaccess.co/insight-api',   // gives 400 - "Block height out of range. Code:-8"
   'https://insight.bitpay.com/api',
@@ -129,6 +129,10 @@ publicInsightUrls.bitcoin = [
   'https://btc-bitcore4.trezor.io/api',
   'https://blockexplorer.com/api',
   'https://bitcore.schmoock.net/insight-api'
+]
+publicInsightUrls["bitcoin Testnet"] = [
+  'https://test-insight.bitpay.com/api',
+  'https://testnet.blockexplorer.com/api'
 ]
 publicInsightUrls.litecoin = [
   'https://ltc-bitcore1.trezor.io/api',
@@ -148,7 +152,7 @@ class MultiInsight {
     const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout')
     const timeout = timeoutOptionSet ? options.timeout : 10
     const chainOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'chain')
-    const chain = chainOptionSet ? options.chain : 'bitcoin'
+    const chain = chainOptionSet ? options.chain : 'bitcoin Mainnet'
 
     // We need at least 2 insight servers (for confirmation)
     const urlsOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'urls') && options.urls.length > 1
@@ -159,7 +163,7 @@ class MultiInsight {
         throw new TypeError('URL must be a string')
       }
       var i
-      if (url === Blockstream.publicBlockstreamUrls.mainnet || url === Blockstream.publicBlockstreamUrls.testnet ) {
+      if (Blockstream.publicBlockstreamUrls[chain].indexOf(url) > -1) {
         i = new Blockstream.BlockstreamExplorer(url, timeout)
       } else {
         i = new Insight(url, timeout)

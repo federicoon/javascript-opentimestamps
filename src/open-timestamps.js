@@ -345,7 +345,7 @@ module.exports = {
         // Request to insight
         const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight')
         const insightOptions = insightOptionSet ? options.insight : null
-        const chain = insightOptionSet && options.insight.chain ? options.insight.chain : 'bitcoin'
+        const chain = insightOptionSet && options.insight.chain ? options.insight.chain : 'bitcoin Mainnet'
         const insight = new Insight.MultiInsight(insightOptions)
         insight.blockhash(attestation.height).then(blockHash => {
           console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
@@ -375,6 +375,28 @@ module.exports = {
         } catch (err) {
           return reject(err)
         }
+      } else if (attestation instanceof Notary.BitcoinTestnetBlockHeaderAttestation) {
+          if (options && options.insight && options.insight.urls) {
+            liteVerify(options)
+          } else {
+            // Check for local bitcoin configuration
+            Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
+              const bitcoin = new Bitcoin.BitcoinNode(properties)
+              bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
+                // One Bitcoin attestation is enought
+                resolve({
+                  attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
+                  chain: 'bitcoin Testnet',
+                  height: attestation.height
+                })
+              }).catch((err) => {
+                reject(new Notary.VerificationError('Bitcoin Testnet verification failed: ' + err.message))
+              })
+            }).catch(() => {
+              console.error('Could not connect to local Bitcoin node')
+              liteVerify()
+            })
+          }
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
         if (options && options.insight && options.insight.urls) {
           liteVerify(options)
@@ -386,11 +408,11 @@ module.exports = {
               // One Bitcoin attestation is enought
               resolve({
                 attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
-                chain: 'bitcoin',
+                chain: 'bitcoin Mainnet',
                 height: attestation.height
               })
             }).catch((err) => {
-              reject(new Notary.VerificationError('Bitcoin verification failed: ' + err.message))
+              reject(new Notary.VerificationError('Bitcoin Mainnet verification failed: ' + err.message))
             })
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')

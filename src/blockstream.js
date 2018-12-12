@@ -116,8 +116,8 @@ class BlockstreamExplorer {
 }
 
 const publicBlockstreamUrls = {
-  mainnet: 'https://blockstream.info/api',
-  testnet: 'https://blockstream.info/testnet/api'
+  "bitcoin Mainnet": ['https://blockstream.info/api'],
+  "bitcoin Testnet": ['https://blockstream.info/testnet/api']
 }
 
 module.exports = {

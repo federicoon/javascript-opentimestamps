@@ -43,6 +43,8 @@ class TimeAttestation {
     /* eslint no-use-before-define: ["error", { "classes": false }] */
     if (Utils.arrEq(tag, new PendingAttestation()._TAG()) === true) {
       return PendingAttestation.deserialize(ctxPayload)
+    } else if (Utils.arrEq(tag, new BitcoinTestnetBlockHeaderAttestation()._TAG()) === true) {
+      return BitcoinTestnetBlockHeaderAttestation.deserialize(ctxPayload)
     } else if (Utils.arrEq(tag, new BitcoinBlockHeaderAttestation()._TAG()) === true) {
       return BitcoinBlockHeaderAttestation.deserialize(ctxPayload)
     } else if (Utils.arrEq(tag, new LitecoinBlockHeaderAttestation()._TAG()) === true) {
@@ -272,6 +274,41 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
     return block.time
   }
 }
+/**
+ * Bitcoin Block Header Attestation.
+ * @extends TimeAttestation
+ */
+class BitcoinTestnetBlockHeaderAttestation extends BitcoinBlockHeaderAttestation {
+  _TAG () {
+    return [0xf4, 0xb4, 0xa5, 0x8e, 0x55, 0x3e, 0x95, 0xb2]
+  }
+
+  constructor (height_) {
+    super(height_)
+  }
+
+  static deserialize (ctxPayload) {
+    const height = ctxPayload.readVaruint()
+    return new BitcoinTestnetBlockHeaderAttestation(height)
+  }
+
+  toString () {
+    return 'BitcoinTestnetBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')'
+  }
+
+  equals (another) {
+    return (another instanceof BitcoinTestnetBlockHeaderAttestation) &&
+            (Utils.arrEq(this._TAG(), another._TAG())) &&
+            (this.height === another.height)
+  }
+
+  compareTo (other) {
+    if (other instanceof BitcoinTestnetBlockHeaderAttestation) {
+      return this.height - other.height
+    }
+    return super.compareTo(other)
+  }
+}
 class LitecoinBlockHeaderAttestation extends TimeAttestation {
   _TAG () {
     return [0x06, 0x86, 0x9a, 0x0d, 0x73, 0xd7, 0x1b, 0x45]
@@ -374,6 +411,7 @@ module.exports = {
   UnknownAttestation,
   PendingAttestation,
   BitcoinBlockHeaderAttestation,
+  BitcoinTestnetBlockHeaderAttestation,
   LitecoinBlockHeaderAttestation,
   EthereumBlockHeaderAttestation
 }

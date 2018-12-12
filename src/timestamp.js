@@ -235,6 +235,10 @@ class Timestamp {
         } else if (attestation instanceof Notary.UnknownAttestation) {
           item.type = 'UnknownAttestation'
           item.param = attestation.payload
+        } else if (attestation instanceof Notary.BitcoinTestnetBlockHeaderAttestation) {
+          item.type = 'BitcoinTestnetBlockHeaderAttestation'
+          item.param = attestation.height
+          item.merkle = Utils.bytesToHex(this.msg.reverse())
         } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
           item.type = 'BitcoinBlockHeaderAttestation'
           item.param = attestation.height
@@ -351,7 +355,11 @@ class Timestamp {
     if (this.attestations.length > 0) {
       this.attestations.forEach(attestation => {
         r += Timestamp.indention(indent) + 'verify ' + attestation.toString() + strResult(verbosity, this.msg) + '\n'
-        if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+        if (attestation instanceof Notary.BitcoinTestnetBlockHeaderAttestation) {
+          const tx = Utils.bytesToHex(new Ops.OpReverse().call(this.msg))
+          r += Timestamp.indention(indent) + '# Bitcoin Testnet block merkle root ' + tx + '\n'
+        }
+        else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
           const tx = Utils.bytesToHex(new Ops.OpReverse().call(this.msg))
           r += Timestamp.indention(indent) + '# Bitcoin block merkle root ' + tx + '\n'
         }
@@ -425,7 +433,9 @@ class Timestamp {
   isTimestampComplete () {
     let found = false
     this.allAttestations().forEach(attestation => {
-      if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+      if (attestation instanceof Notary.BitcoinTestnetBlockHeaderAttestation) {
+        found = true
+      } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
         found = true
       } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
         found = true
