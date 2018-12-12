@@ -357,7 +357,7 @@ class Timestamp {
         r += Timestamp.indention(indent) + 'verify ' + attestation.toString() + strResult(verbosity, this.msg) + '\n'
         if (attestation instanceof Notary.BitcoinTestnetBlockHeaderAttestation) {
           const tx = Utils.bytesToHex(new Ops.OpReverse().call(this.msg))
-          r += Timestamp.indention(indent) + '# Bitcoin Testnet block merkle root ' + tx + '\n'
+          r += Timestamp.indention(indent) + '# BitcoinTestnet block merkle root ' + tx + '\n'
         }
         else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
           const tx = Utils.bytesToHex(new Ops.OpReverse().call(this.msg))

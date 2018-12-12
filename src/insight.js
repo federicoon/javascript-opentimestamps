@@ -121,7 +121,7 @@ class Insight {
 }
 
 const publicInsightUrls = {}
-publicInsightUrls["bitcoin Mainnet"] = [
+publicInsightUrls.bitcoin = [
 //  'https://www.localbitcoinschain.com/api',  // gives 502 - "lots of HTML code"
 //  'https://search.bitaccess.co/insight-api',   // gives 400 - "Block height out of range. Code:-8"
   'https://insight.bitpay.com/api',
@@ -130,7 +130,7 @@ publicInsightUrls["bitcoin Mainnet"] = [
   'https://blockexplorer.com/api',
   'https://bitcore.schmoock.net/insight-api'
 ]
-publicInsightUrls["bitcoin Testnet"] = [
+publicInsightUrls.bitcoinTestnet = [
   'https://test-insight.bitpay.com/api',
   'https://testnet.blockexplorer.com/api'
 ]
@@ -152,7 +152,7 @@ class MultiInsight {
     const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout')
     const timeout = timeoutOptionSet ? options.timeout : 10
     const chainOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'chain')
-    const chain = chainOptionSet ? options.chain : 'bitcoin Mainnet'
+    const chain = chainOptionSet ? options.chain : 'bitcoin'
 
     // We need at least 2 insight servers (for confirmation)
     const urlsOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'urls') && options.urls.length > 1

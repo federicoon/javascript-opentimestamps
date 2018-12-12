@@ -345,7 +345,7 @@ module.exports = {
         // Request to insight
         const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight')
         const insightOptions = insightOptionSet ? options.insight : null
-        const chain = insightOptionSet && options.insight.chain ? options.insight.chain : 'bitcoin Mainnet'
+        const chain = insightOptionSet && options.insight.chain ? options.insight.chain : 'bitcoin'
         const insight = new Insight.MultiInsight(insightOptions)
         insight.blockhash(attestation.height).then(blockHash => {
           console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
@@ -386,14 +386,14 @@ module.exports = {
                 // One Bitcoin attestation is enought
                 resolve({
                   attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
-                  chain: 'bitcoin Testnet',
+                  chain: 'bitcoinTestnet',
                   height: attestation.height
                 })
               }).catch((err) => {
-                reject(new Notary.VerificationError('Bitcoin Testnet verification failed: ' + err.message))
+                reject(new Notary.VerificationError('BitcoinTestnet verification failed: ' + err.message))
               })
             }).catch(() => {
-              console.error('Could not connect to local Bitcoin node')
+              console.error('Could not connect to local BitcoinTestnet node')
               liteVerify()
             })
           }
@@ -408,11 +408,11 @@ module.exports = {
               // One Bitcoin attestation is enought
               resolve({
                 attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
-                chain: 'bitcoin Mainnet',
+                chain: 'bitcoin',
                 height: attestation.height
               })
             }).catch((err) => {
-              reject(new Notary.VerificationError('Bitcoin Mainnet verification failed: ' + err.message))
+              reject(new Notary.VerificationError('Bitcoin verification failed: ' + err.message))
             })
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
