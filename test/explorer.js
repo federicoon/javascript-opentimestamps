@@ -1,5 +1,5 @@
 const test = require('tape')
-const Explorer = require('../src/chainExplorer.js')
+const Explorer = require('../src/chain-explorer.js')
 const options = {
 	explorers: [
     	{url: 'https://blockstream.info/testnet/api', type: 'blockstream'},

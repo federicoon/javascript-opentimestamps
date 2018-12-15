@@ -15,7 +15,7 @@ const Utils = require('./utils.js')
 const Ops = require('./ops.js')
 const Calendar = require('./calendar.js')
 const Notary = require('./notary.js')
-const Explorer = require('./chainExplorer.js')
+const Explorer = require('./chain-explorer.js')
 const Merkle = require('./merkle.js')
 const Bitcoin = require('./bitcoin.js')
 
