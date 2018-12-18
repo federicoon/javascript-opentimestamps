@@ -180,8 +180,8 @@ class Blockstream extends ChainExplorer {
    */
   constructor (url, timeout) {
     super(url, timeout)
-    this.urlBlockindex = url + '/block-height/' // need a '/' more, as api urls with heading '/0' are not decoded correctly!
-    this.urlBlock = url + '/block/'
+    this.urlBlockindex = url + '/block-height'
+    this.urlBlock = url + '/block'
   }
 
   /**

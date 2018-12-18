@@ -25,7 +25,7 @@ test('Bitcoin.getChain()', assert => {
     // console.log(properties);
     const bitcoin = new Bitcoin.BitcoinNode(properties)
     bitcoin.getChain().then(json => {
-      assert.true(json !== undefined)
+      assert.true(json !== undefined)            
       assert.end()
     }).catch(err => {
       assert.true('err=' + err)

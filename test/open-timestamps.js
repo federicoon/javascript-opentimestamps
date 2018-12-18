@@ -1,15 +1,22 @@
 
 const test = require('tape')
+const fs = require('fs');
 const rp = require('request-promise')
 const Utils = require('../src/utils.js')
 const OpenTimestamps = require('../src/open-timestamps.js')
+const Calendar = require('../src/calendar.js')
 const DetachedTimestampFile = require('../src/detached-timestamp-file.js')
 const Context = require('../src/context.js')
 const Ops = require('../src/ops.js')
 const Notary = require('../src/notary.js')
 
 // const Timestamp = require('../timestamp.js');
-const baseUrl = 'https://raw.githubusercontent.com/opentimestamps/javascript-opentimestamps/master'
+const baseUrl = 'https://raw.githubusercontent.com/federicoon/javascript-opentimestamps/master'
+	
+const calendarsList = ['http://calendar.irsa.it:80', 'https://alice.btc.calendar.opentimestamps.org']
+const whitelistedCalendars = new Calendar.UrlWhitelist(calendarsList)
+const upgradeOptions = { whitelist: whitelistedCalendars }
+
 let incompleteOtsInfo
 let incompleteOts
 let incomplete
@@ -27,6 +34,8 @@ let badStamp
 let badStampOts
 let osdsp
 let osdspOts
+let differentBitcoinBlockchains
+let differentBitcoinBlockchainsOts
 
 test('setup', assert => {
   const incompleteOtsInfoPromise = rp({url: baseUrl + '/examples/incomplete.txt.ots.info', encoding: null})
@@ -54,6 +63,9 @@ test('setup', assert => {
   const osdspPromise = rp({url: baseUrl + '/examples/osdsp.txt', encoding: null})
   const osdspOtsPromise = rp({url: baseUrl + '/examples/osdsp.txt.ots', encoding: null})
 
+  const differentBitcoinBlockchainsPromise = rp({url: baseUrl + '/examples/different-bitcoin-blockchains.txt', encoding: null})
+  const differentBitcoinBlockchainsOtsPromise = rp({url: baseUrl + '/examples/different-bitcoin-blockchains.txt.ots', encoding: null})
+
   Promise.all([
     incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise,
     helloworldOtsPromise, helloworldPromise,
@@ -62,7 +74,8 @@ test('setup', assert => {
     knownUnknownPromise, knownUnknownOtsPromise,
     merkle3Promise, merkle3OtsPromise,
     badStampPromise, badStampOtsPromise,
-    osdspPromise, osdspOtsPromise
+    osdspPromise, osdspOtsPromise,
+    differentBitcoinBlockchainsPromise, differentBitcoinBlockchainsOtsPromise
   ]).then(values => {
     incompleteOtsInfo = values[0]
     incompleteOts = values[1]
@@ -81,6 +94,8 @@ test('setup', assert => {
     badStampOts = values[14]
     osdsp = values[15]
     osdspOts = values[16]
+    differentBitcoinBlockchains = values[17]
+    differentBitcoinBlockchainsOts = values[18]
     assert.end()
   }).catch(err => {
     assert.fail('err=' + err)
@@ -244,6 +259,21 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.true(detached !== null)
     assert.false(changed)
     assert.true(detached.equals(detachedBefore))
+    assert.end()
+  }).catch(err => {
+    assert.fail('err=' + err)
+    assert.end()
+  })
+})
+
+test('MULTICHAIN OpenTimestamps.upgrade()', assert => {
+  const detached = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(differentBitcoinBlockchainsOts))
+  const detachedBefore = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(differentBitcoinBlockchainsOts))
+
+  OpenTimestamps.upgrade(detached, upgradeOptions).then(changed => {
+    assert.true(detached !== null)
+    assert.true(changed)
+    assert.false(detached.equals(detachedBefore))
     assert.end()
   }).catch(err => {
     assert.fail('err=' + err)

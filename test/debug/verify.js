@@ -9,7 +9,22 @@ const Ops = require('../../src/ops.js')
 const Notary = require('../../src/notary.js')
 
 // const Timestamp = require('../timestamp.js');
-const baseUrl = 'https://raw.githubusercontent.com/opentimestamps/javascript-opentimestamps/master'
+const baseUrl = 'https://raw.githubusercontent.com/federicoon/javascript-opentimestamps/master'
+const blockexplorers = {
+	bitcoin: {
+	  explorers: [
+    	{url: 'https://blockstream.info/api', type: 'blockstream'},
+    	{url: 'https://blockexplorer.com/api', type: 'insight'}
+	  ]
+	},
+	bitcoinTestnet: {
+	  explorers: [
+			{url: 'https://blockstream.info/testnet/api', type: 'blockstream'},
+			{url: 'https://testnet.blockexplorer.com/api', type: 'insight'}
+	  ]
+	}
+}
+
 let incompleteOtsInfo
 let incompleteOts
 let incomplete
@@ -27,6 +42,8 @@ let badStamp
 let badStampOts
 let osdsp
 let osdspOts
+let differentBitcoinBlockchains
+let differentBitcoinBlockchainsOts
 
 test('setup', assert => {
     const incompleteOtsInfoPromise = rp({url: baseUrl + '/examples/incomplete.txt.ots.info', encoding: null})
@@ -54,6 +71,9 @@ test('setup', assert => {
     const osdspPromise = rp({url: baseUrl + '/examples/osdsp.txt', encoding: null})
     const osdspOtsPromise = rp({url: baseUrl + '/examples/osdsp.txt.ots', encoding: null})
 
+    const differentBitcoinBlockchainsPromise = rp({url: baseUrl + '/examples/different-bitcoin-blockchains.txt', encoding: null})
+    const differentBitcoinBlockchainsOtsPromise = rp({url: baseUrl + '/examples/different-bitcoin-blockchains.txt.upgraded.ots', encoding: null})
+
     Promise.all([
         incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise,
         helloworldOtsPromise, helloworldPromise,
@@ -62,7 +82,8 @@ test('setup', assert => {
         knownUnknownPromise, knownUnknownOtsPromise,
         merkle3Promise, merkle3OtsPromise,
         badStampPromise, badStampOtsPromise,
-        osdspPromise, osdspOtsPromise
+        osdspPromise, osdspOtsPromise,
+        differentBitcoinBlockchainsPromise, differentBitcoinBlockchainsOtsPromise
     ]).then(values => {
         incompleteOtsInfo = values[0]
         incompleteOts = values[1]
@@ -81,13 +102,15 @@ test('setup', assert => {
         badStampOts = values[14]
         osdsp = values[15]
         osdspOts = values[16]
+        differentBitcoinBlockchains = values[17]
+        differentBitcoinBlockchainsOts = values[18]
         assert.end()
     }).catch(err => {
         assert.fail('err=' + err)
     })
 })
 
-test('OpenTimestamps.verify()', assert => {
+	test('OpenTimestamps.verify()', assert => {
     let detached
     let detachedOts
     try {
@@ -299,6 +322,48 @@ test('OpenTimestamps.multipleBitcoinAttestations()', assert => {
         assert.true(result !== null)
         // check min bitcoin attestation
         assert.deepEqual(result, {'bitcoin': {'timestamp': 1526719849, 'height': 523364}})
+        assert.end()
+    }).catch(err => {
+        assert.fail('err=' + err)
+        assert.end()
+    })
+})
+test('OpenTimestamps.multipleBitcoinChainAttestations()', assert => {
+    const ots = DetachedTimestampFile.deserialize(differentBitcoinBlockchainsOts)
+    const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), differentBitcoinBlockchains)
+
+    // ots is a completed timestamp with 1 Bitcoin Attestation at block 554222
+    // and 1 BitcoinTestnet Attestation at block 1448221
+    assert.true(ots.timestamp.isTimestampComplete())
+    const bitcoins = [...ots.timestamp.getAttestations()].filter(a => { return (a instanceof Notary.BitcoinBlockHeaderAttestation) ? a : undefined })
+    const bitcoinsTestnet = [...ots.timestamp.getAttestations()].filter(a => { return (a instanceof Notary.BitcoinTestnetBlockHeaderAttestation) ? a : undefined })
+    assert.equals(bitcoins.length, 2)
+    assert.equals(bitcoins[1].height, 554222)
+    assert.equals(bitcoinsTestnet.length, 1)
+    assert.equals(bitcoinsTestnet[0].height, 1448221)
+
+    // upgrade ots to resolve the 3 pending attestations
+    OpenTimestamps.upgrade(ots).then(changed => {
+        assert.true(ots !== null)
+        assert.false(changed)
+
+        const bitcoins554222 = [...ots.timestamp.getAttestations()].filter(a => {
+            return (a instanceof Notary.BitcoinBlockHeaderAttestation && a.height === 554222) ? a : undefined
+        })
+        const bitcoins1448221 = [...ots.timestamp.getAttestations()].filter(a => {
+            return (a instanceof Notary.BitcoinTestnetBlockHeaderAttestation && a.height === 1448221) ? a : undefined
+        })
+        assert.equals(bitcoins554222.length, 1)
+        assert.equals(bitcoins1448221.length, 1)
+
+        // verify upgreaded ots to obtain the min bitcoin attestation
+        return OpenTimestamps.verify(ots, detached, blockexplorers)
+    }).then(result => {
+        assert.true(ots !== null)
+        assert.true(result !== null)
+        // check bitcoin attestations
+        assert.deepEqual(result, {'bitcoin': {'timestamp': 1545064688, 'height': 554222},
+        						'bitcoinTestnet': {'timestamp': 1545066069, 'height': 1448221}})
         assert.end()
     }).catch(err => {
         assert.fail('err=' + err)

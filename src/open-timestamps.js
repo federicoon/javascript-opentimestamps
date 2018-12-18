@@ -382,42 +382,47 @@ module.exports = {
         }
       } else if (attestation instanceof Notary.BitcoinTestnetBlockHeaderAttestation) {
     	  const chain = 'bitcoinTestnet'
-          if (options && options.bitcoinTestnet) {
-            options = options.bitcoinTestnet
-            options.chain = chain
-            liteVerify(options)
-          } else {
-            // Check for local bitcoin configuration
-            Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
-              const bitcoin = new Bitcoin.BitcoinNode(properties)
-              const localChain = bitcoin.getChain()
-              
-              if (localChain !== 'test') {
-                console.error('Local Bitcoin node not on Testnet')
-                options = {}
-                options.chain = chain
-                liteVerify(options)
-              } else {
-	            bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
-	              // One Bitcoin attestation is enought
-	              resolve({
-	                attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
-	                chain: chain,
-	                height: attestation.height
+	      if (options && options.bitcoinTestnet) {
+	        options = options.bitcoinTestnet
+	        options.chain = chain
+	        liteVerify(options)
+	      } else {
+	        // Check for local bitcoin configuration
+	        Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
+	          const bitcoin = new Bitcoin.BitcoinNode(properties)
+	          bitcoin.getChain().then(localChain => {
+	            if (localChain !== 'test') {
+	              console.error('Local Bitcoin node not on Testnet')
+	              options = {}
+	              options.chain = chain
+	              liteVerify(options)
+	            } else {
+	              bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
+	                // One Bitcoin attestation is enought
+	                resolve({
+	                  attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
+	                  chain: chain,
+	                  height: attestation.height
+	                })
+	              }).catch((err) => {
+	                reject(new Notary.VerificationError('BitcoinTestnet verification failed: ' + err.message))
 	              })
-	            }).catch((err) => {
-	              reject(new Notary.VerificationError('BitcoinTestnet verification failed: ' + err.message))
-	            })
-              }
-            }).catch(() => {
-              console.error('Could not connect to local BitcoinTestnet node')
+	            }
+					  }).catch(err => {
+						  console.error('Could not detect local node\'s chain: ' + err.message)
               options = {}
               options.chain = chain
-              liteVerify()
-            })
-          }
+              liteVerify(options)
+					  })  
+	        }).catch(() => {
+	        	console.error('Could not connect to local BitcoinTestnet node')
+	        	options = {}
+	        	options.chain = chain
+	        	liteVerify(options)
+	        })
+	      }
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-    	const chain = 'bitcoin'
+      	const chain = 'bitcoin'
         if (options && options.bitcoin) {
           options = options.bitcoin
           options.chain = chain
@@ -426,25 +431,30 @@ module.exports = {
           // Check for local bitcoin configuration
           Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
             const bitcoin = new Bitcoin.BitcoinNode(properties)
-            const localChain = bitcoin.getChain()
-            
-            if (localChain !== 'main') {
-                console.error('Local Bitcoin node not on Mainnet')
-                options = {}
-                options.chain = chain
-                liteVerify(options)
-            } else {
-	            bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
-	              // One Bitcoin attestation is enought
-	              resolve({
-	                attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
-	                chain: chain,
-	                height: attestation.height
-	              })
-	            }).catch((err) => {
-	              reject(new Notary.VerificationError('Bitcoin verification failed: ' + err.message))
-	            })
-            }
+            bitcoin.getChain().then(localChain => {
+            	if (localChain !== 'main') {
+            		console.error('Local Bitcoin node not on Mainnet')
+            		options = {}
+            		options.chain = chain
+            		liteVerify(options)
+            	} else {
+            		bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
+            			// One Bitcoin attestation is enought
+            			resolve({
+            				attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
+            				chain: chain,
+            				height: attestation.height
+            			})
+            		}).catch((err) => {
+            			reject(new Notary.VerificationError('Bitcoin verification failed: ' + err.message))
+            		})
+            	}
+            }).catch(err => {
+            	console.error('Could not detect local node\'s chain: ' + err.message)
+            	options = {}
+            	options.chain = chain
+            	liteVerify(options)
+            })  
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
             options = {}
