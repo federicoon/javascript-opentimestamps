@@ -42,7 +42,6 @@ class ChainExplorer {
       json: true,
       timeout: this.timeout
     }
-
     return this.parseBlockhash(options)
   }
 
@@ -74,7 +73,6 @@ class ChainExplorer {
       json: true,
       timeout: this.timeout
     }
-
     return this.parseBlockInfo(options)
   }
 
