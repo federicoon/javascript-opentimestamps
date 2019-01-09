@@ -35,7 +35,7 @@ class ChainExplorer {
       url: this.urlBlockindex + '/' + height,
       method: 'GET',
       headers: {
-        Accept: '*/*',
+        Accept: 'application/json',
         'User-Agent': 'javascript-opentimestamps',
         'Content-Type': 'application/x-www-form-urlencoded'
       },

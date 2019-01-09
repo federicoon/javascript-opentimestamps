@@ -248,13 +248,31 @@ module.exports = {
    * @param {DetachedTimestampFile} detachedOriginal - The detached of original file.
 
    * @param {Object}   options - The option arguments.
-   * @param {Object[]} options.explorers: array of block explorer server objects
-   * @param {String}   options.explorers[].url: block explorer server url
-   * @param {String}   options.explorers[].type: block explorer server type: {insight|blockstream}
-   * @param {number}   options.timeout: timeout (in seconds) for the calls to explorer servers
-
    * @param {String[]} options.calendars - Override calendars in timestamp.
    * @param {UrlWhitelist} options.whitelist - Remote calendar whitelist.
+   * @param {Object} options.X - The options for chain X.
+   * @param {number} options.X.timeout - timeout (in seconds) used for calls to explorer servers
+   * @param {Object[]} options.X.explorers - array of explorer servers for chain X
+   * @param {String} options.X.explorers[].url - explorer servers url for chain X
+   * @param {String} options.X.explorers[].class - explorer servers type: {insight|blockstream}
+   * 
+   * Example of options:
+   *
+   *	const options = {
+   *		bitcoin: {
+   *		  explorers: [
+   *	    	{url: 'https://blockstream.info/api', type: 'blockstream'},
+   *	    	{url: 'https://blockexplorer.com/api', type: 'insight'}
+   *		  ]
+   *		},
+   *		litecoin: {
+   *		  explorers: [
+   *				{url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight'},
+   *				{url: 'https://insight.litecore.io/api', type: 'insight'}
+   *		  ]
+   *		}
+   *	}			
+   *
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
    */
   verify (detachedStamped, detachedOriginal, options) {
@@ -282,8 +300,29 @@ module.exports = {
   /** Verify a timestamp.
    * @param {Timestamp} timestamp - The timestamp.
    * @param {Object} options - The option arguments.
-   * @param {String[]} options.explorer.urls - array of explorer server urls
-   * @param {number} options.explorer.timeout - timeout (in seconds) used for calls to explorer servers
+   * @param {Object} options.X - The options for chain X.
+   * @param {number} options.X.timeout - timeout (in seconds) used for calls to explorer servers
+   * @param {Object[]} options.X.explorers - array of explorer servers for chain X
+   * @param {String} options.X.explorers[].url - explorer servers url for chain X
+   * @param {String} options.X.explorers[].class - explorer servers type: {insight|blockstream}
+   * 
+   * Example of options:
+   *
+   *	const options = {
+   *		bitcoin: {
+   *		  explorers: [
+   *	    	{url: 'https://blockstream.info/api', type: 'blockstream'},
+   *	    	{url: 'https://blockexplorer.com/api', type: 'insight'}
+   *		  ]
+   *		},
+   *		litecoin: {
+   *		  explorers: [
+   *				{url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight'},
+   *				{url: 'https://insight.litecore.io/api', type: 'insight'}
+   *		  ]
+   *		}
+   *	}			
+   *
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
    *    timestamp: unix timestamp
    *    height: block height of the min attestation
@@ -335,15 +374,29 @@ module.exports = {
    * @param {TimeAttestation} attestation - The attestation to verify.
    * @param {byte[]} msg - The digest to verify.
    * @param {Object} options - The option arguments.
-   * @param {Object} options.bitcoin - The options for bitcoin chain.
-   * @param {number} options.bitcoin.timeout - timeout (in seconds) used for calls to explorer servers
-   * @param {Object[]} options.bitcoin.explorers - array of bitcoin explorer servers
-   * @param {String} options.bitcoin.explorers[].url - explorer servers url
-   * @param {String} options.bitcoin.explorers[].class - explorer servers type: {Insight|Blockstream}
-   * @param {Object} options.bitcoinTestnet - The options for bitcoinTestnet chain.
-   * @param {number} options.bitcoinTestnet.timeout - timeout (in seconds) used for calls to explorer servers
-   * @param {Object[]} options.bitcoinTestnet.explorers - array of bitcoinTestnet explorer servers
-   *    [...]
+   * @param {Object} options.X - The options for chain X.
+   * @param {number} options.X.timeout - timeout (in seconds) used for calls to explorer servers
+   * @param {Object[]} options.X.explorers - array of explorer servers for chain X
+   * @param {String} options.X.explorers[].url - explorer servers url for chain X
+   * @param {String} options.X.explorers[].class - explorer servers type: {insight|blockstream}
+   * 
+   * Example of options:
+   *
+   *	const options = {
+   *		bitcoin: {
+   *		  explorers: [
+   *	    	{url: 'https://blockstream.info/api', type: 'blockstream'},
+   *	    	{url: 'https://blockexplorer.com/api', type: 'insight'}
+   *		  ]
+   *		},
+   *		litecoin: {
+   *		  explorers: [
+   *				{url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight'},
+   *				{url: 'https://insight.litecore.io/api', type: 'insight'}
+   *		  ]
+   *		}
+   *	}			
+   *
    * @return {Promise<Object,Error>} if resolve return verified attestations parameters
    *    chain: the chain type
    *    attestedTime: unix timestamp fo the block
