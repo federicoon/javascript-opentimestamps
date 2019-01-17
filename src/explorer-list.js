@@ -19,6 +19,10 @@ defaultExplorers.bitcoin = [
   { url: 'https://blockexplorer.com/api',            type: 'insight' },
   { url: 'https://bitcore.schmoock.net/insight-api', type: 'insight' }
 ]
+defaultExplorers.bitcoinTestnet = [
+  { url: 'https://blockstream.info/testnet/api',     type: 'blockstream' },
+  { url: 'https://test-insight.bitpay.com/api',      type: 'insight' }
+]
 defaultExplorers.litecoin = [
   { url: 'https://ltc-bitcore1.trezor.io/api',       type: 'insight' },
   { url: 'https://insight.litecore.io/api',          type: 'insight' }
