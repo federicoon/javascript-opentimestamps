@@ -258,20 +258,20 @@ module.exports = {
    * 
    * Example of options:
    *
-   *	const options = {
-   *		bitcoin: {
-   *		  explorers: [
-   *	    	{url: 'https://blockstream.info/api', type: 'blockstream'},
-   *	    	{url: 'https://blockexplorer.com/api', type: 'insight'}
-   *		  ]
-   *		},
-   *		litecoin: {
-   *		  explorers: [
-   *				{url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight'},
-   *				{url: 'https://insight.litecore.io/api', type: 'insight'}
-   *		  ]
-   *		}
-   *	}			
+   * const options = {
+   *    bitcoin: {
+   *      explorers: [
+   *        {url: 'https://blockstream.info/api', type: 'blockstream'},
+   *        {url: 'https://blockexplorer.com/api', type: 'insight'}
+   *      ]
+   *    },
+   *    litecoin: {
+   *      explorers: [
+   *        {url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight'},
+   *        {url: 'https://insight.litecore.io/api', type: 'insight'}
+   *      ]
+   *    }
+   *  }
    *
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
    */
@@ -308,20 +308,20 @@ module.exports = {
    * 
    * Example of options:
    *
-   *	const options = {
-   *		bitcoin: {
-   *		  explorers: [
-   *	    	{url: 'https://blockstream.info/api', type: 'blockstream'},
-   *	    	{url: 'https://blockexplorer.com/api', type: 'insight'}
-   *		  ]
-   *		},
-   *		litecoin: {
-   *		  explorers: [
-   *				{url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight'},
-   *				{url: 'https://insight.litecore.io/api', type: 'insight'}
-   *		  ]
-   *		}
-   *	}			
+   * const options = {
+   *    bitcoin: {
+   *      explorers: [
+   *        {url: 'https://blockstream.info/api', type: 'blockstream'},
+   *        {url: 'https://blockexplorer.com/api', type: 'insight'}
+   *      ]
+   *    },
+   *    litecoin: {
+   *      explorers: [
+   *        {url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight'},
+   *        {url: 'https://insight.litecore.io/api', type: 'insight'}
+   *      ]
+   *    }
+   *  }
    *
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
    *    timestamp: unix timestamp
@@ -382,24 +382,7 @@ module.exports = {
    * 
    * Example of options:
    *
-   *	const options = {
-<<<<<<< HEAD
-   *		bitcoin: {
-   *		  explorers: [
-   *	    	{url: 'https://blockstream.info/api', type: 'blockstream'},
-   *	    	{url: 'https://blockexplorer.com/api', type: 'insight'}
-   *		  ]
-   *		},
-   *		litecoin: {
-   *		  explorers: [
-   *				{url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight'},
-   *				{url: 'https://insight.litecore.io/api', type: 'insight'}
-   *		  ]
-   *		}
-   *	}			
-   *
-   * @return {Promise<Object,Error>} if resolve return verified attestations parameters
-=======
+   * const options = {
    *    bitcoin: {
    *      explorers: [
    *        {url: 'https://blockstream.info/api', type: 'blockstream'},
@@ -414,8 +397,7 @@ module.exports = {
    *    }
    *  }
    * 
-   *   * @return {Promise<Object,Error>} if resolve return verified attestations parameters
->>>>>>> e5039971953f1d3b3c0b8706a35210a82d0cbae4
+   *  @return {Promise<Object,Error>} if resolve return verified attestations parameters
    *    chain: the chain type
    *    attestedTime: unix timestamp fo the block
    *    height: block height of the attestation
@@ -457,22 +439,22 @@ module.exports = {
           return reject(err)
         }
       } else if (attestation instanceof Notary.BitcoinTestnetBlockHeaderAttestation) {
-    	  const chain = 'bitcoinTestnet'
-	      if (options && options.bitcoinTestnet) {
-	        options = options.bitcoinTestnet
-	        options.chain = chain
-	        liteVerify(options)
-	      } else {
-	        // Check for local bitcoin configuration
-	        Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
-	          const bitcoin = new Bitcoin.BitcoinNode(properties)
-	          bitcoin.getChain().then(localChain => {
-	            if (localChain !== 'test') {
+    	const chain = 'bitcoinTestnet'
+	if (options && options.bitcoinTestnet) {
+	   options = options.bitcoinTestnet
+	   options.chain = chain
+	   liteVerify(options)
+	} else {
+	   // Check for local bitcoin configuration
+	   Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
+	      const bitcoin = new Bitcoin.BitcoinNode(properties)
+	      bitcoin.getChain().then(localChain => {
+	          if (localChain !== 'test') {
 	              console.error('Local Bitcoin node not on Testnet')
 	              options = {}
 	              options.chain = chain
 	              liteVerify(options)
-	            } else {
+	           } else {
 	              bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
 	                // One Bitcoin attestation is enought
 	                resolve({
@@ -483,20 +465,20 @@ module.exports = {
 	              }).catch((err) => {
 	                reject(new Notary.VerificationError('BitcoinTestnet verification failed: ' + err.message))
 	              })
-	            }
-					  }).catch(err => {
-						  console.error('Could not detect local node\'s chain: ' + err.message)
-              options = {}
-              options.chain = chain
-              liteVerify(options)
-					  })  
-	        }).catch(() => {
-	        	console.error('Could not connect to local BitcoinTestnet node')
-	        	options = {}
-	        	options.chain = chain
-	        	liteVerify(options)
-	        })
-	      }
+	           }
+              }).catch(err => {
+		console.error('Could not detect local node\'s chain: ' + err.message)
+                options = {}
+                options.chain = chain
+                liteVerify(options)
+	      })  
+	   }).catch(() => {
+	      console.error('Could not connect to local BitcoinTestnet node')
+	      options = {}
+	      options.chain = chain
+	      liteVerify(options)
+	   })
+	 }
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
       	const chain = 'bitcoin'
         if (options && options.bitcoin) {
