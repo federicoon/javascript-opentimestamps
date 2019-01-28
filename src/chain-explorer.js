@@ -36,10 +36,6 @@ class ChainExplorer {
       method: 'GET',
       headers: {
         Accept: 'application/json',
-        
-        // will fail on some browsers (e.g. Firefox) as CORS policy triggers pre-flight request
-        // see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Preflighted_requests
-        //'User-Agent': 'javascript-opentimestamps',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       json: true,
@@ -70,10 +66,6 @@ class ChainExplorer {
       method: 'GET',
       headers: {
         Accept: 'application/json',
-        
-        // will fail on some browsers (e.g. Firefox) as CORS policy triggers pre-flight request
-        // see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Preflighted_requests
-        //'User-Agent': 'javascript-opentimestamps',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       json: true,

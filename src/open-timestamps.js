@@ -370,7 +370,7 @@ module.exports = {
     })
   },
 
-  /** Verify an attestation.
+/** Verify an attestation.
    * @param {TimeAttestation} attestation - The attestation to verify.
    * @param {byte[]} msg - The digest to verify.
    * @param {Object} options - The option arguments.
@@ -383,6 +383,7 @@ module.exports = {
    * Example of options:
    *
    *	const options = {
+<<<<<<< HEAD
    *		bitcoin: {
    *		  explorers: [
    *	    	{url: 'https://blockstream.info/api', type: 'blockstream'},
@@ -398,6 +399,23 @@ module.exports = {
    *	}			
    *
    * @return {Promise<Object,Error>} if resolve return verified attestations parameters
+=======
+   *    bitcoin: {
+   *      explorers: [
+   *        {url: 'https://blockstream.info/api', type: 'blockstream'},
+   *        {url: 'https://blockexplorer.com/api', type: 'insight'}
+   *      ]
+   *    },
+   *    litecoin: {
+   *      explorers: [
+   *        {url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight'},
+   *        {url: 'https://insight.litecore.io/api', type: 'insight'}
+   *      ]
+   *    }
+   *  }
+   * 
+   *   * @return {Promise<Object,Error>} if resolve return verified attestations parameters
+>>>>>>> e5039971953f1d3b3c0b8706a35210a82d0cbae4
    *    chain: the chain type
    *    attestedTime: unix timestamp fo the block
    *    height: block height of the attestation
@@ -482,9 +500,9 @@ module.exports = {
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
       	const chain = 'bitcoin'
         if (options && options.bitcoin) {
-          options = options.bitcoin
-          options.chain = chain
-          liteVerify(options)
+          lite_options = options.bitcoin
+          lite_options.chain = chain
+          liteVerify(lite_options)
         } else {
           // Check for local bitcoin configuration
           Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
@@ -492,9 +510,9 @@ module.exports = {
             bitcoin.getChain().then(localChain => {
             	if (localChain !== 'main') {
             		console.error('Local Bitcoin node not on Mainnet')
-            		options = {}
-            		options.chain = chain
-            		liteVerify(options)
+            		lite_options = {}
+            		lite_options.chain = chain
+            		liteVerify(lite_options)
             	} else {
             		bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
             			// One Bitcoin attestation is enought
@@ -509,23 +527,25 @@ module.exports = {
             	}
             }).catch(err => {
             	console.error('Could not detect local node\'s chain: ' + err.message)
-            	options = {}
-            	options.chain = chain
-            	liteVerify(options)
+            	lite_options = {}
+            	lite_options.chain = chain
+            	liteVerify(lite_options)
             })  
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
-            options = {}
-            options.chain = chain
-            liteVerify(options)
+            lite_options = {}
+            lite_options.chain = chain
+            liteVerify(lite_options)
           })
         }
       } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
-        if (!options) {
-          options = {}
+        if (options && options.litecoin) {
+          lite_options = options.litecoin
+        } else {
+          lite_options = {}
         }
-        options.chain = 'litecoin'
-        liteVerify(options)
+        lite_options.chain = 'litecoin'
+        liteVerify(lite_options)
       }
     })
   },
