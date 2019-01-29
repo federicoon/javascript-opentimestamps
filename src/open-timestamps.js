@@ -440,11 +440,10 @@ module.exports = {
         }
       } else if (attestation instanceof Notary.BitcoinTestnetBlockHeaderAttestation) {
         const chain = 'bitcoinTestnet'
-        var lite_options = {chain: chain}
+        var liteOptions = {chain: chain}
         if (options && options.bitcoinTestnet) {
-          lite_options = options.bitcoinTestnet
-          lite_options.chain = chain
-          liteVerify(lite_options)
+          Object.assign(liteOptions, options.bitcoinTestnet)
+          liteVerify(liteOptions)
         } else {
           // Check for local bitcoin configuration
           Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
@@ -452,7 +451,7 @@ module.exports = {
             bitcoin.getChain().then(localChain => {
               if (localChain !== 'test') {
                 console.error('Local Bitcoin node not on Testnet')
-                liteVerify(lite_options)
+                liteVerify(liteOptions)
               } else {
                 bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
                   // One Bitcoin attestation is enought
@@ -467,21 +466,19 @@ module.exports = {
               }
             }).catch(err => {
               console.error('Could not detect local node\'s chain: ' + err.message)
-              liteVerify(lite_options)
+              liteVerify(liteOptions)
             })  
           }).catch(() => {
             console.error('Could not connect to local BitcoinTestnet node')
-            liteVerify(lite_options)
+            liteVerify(liteOptions)
           })
         }
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
         const chain = 'bitcoin'
-        var lite_options = {}
-        lite_options.chain = chain
+        var liteOptions = {chain: chain}
         if (options && options.bitcoin) {
-          lite_options = options.bitcoin
-          lite_options.chain = chain
-          liteVerify(lite_options)
+          Object.assign(liteOptions, options.bitcoin)
+          liteVerify(liteOptions)
         } else {
           // Check for local bitcoin configuration
           Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
@@ -489,7 +486,7 @@ module.exports = {
             bitcoin.getChain().then(localChain => {
               if (localChain !== 'main') {
                 console.error('Local Bitcoin node not on Mainnet')
-                liteVerify(lite_options)
+                liteVerify(liteOptions)
               } else {
                 bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
                   // One Bitcoin attestation is enought
@@ -504,20 +501,20 @@ module.exports = {
               }
             }).catch(err => {
               console.error('Could not detect local node\'s chain: ' + err.message)
-              liteVerify(lite_options)
+              liteVerify(liteOptions)
             })  
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
-            liteVerify(lite_options)
+            liteVerify(liteOptions)
           })
         }
       } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
-        var lite_options = {}
+        var liteOptions = {}
         if (options && options.litecoin) {
-          lite_options = options.litecoin
+          liteOptions = options.litecoin
         }
-        lite_options.chain = 'litecoin'
-        liteVerify(lite_options)
+        liteOptions.chain = 'litecoin'
+        liteVerify(liteOptions)
       }
     })
   },
