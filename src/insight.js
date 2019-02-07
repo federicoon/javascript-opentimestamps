@@ -9,23 +9,19 @@
 
 const requestPromise = require('request-promise')
 const Promise = require('promise')
-const Blockstream = require('./blockstream.js')
-const Utils = require('./utils.js')
+const ChainExplorer = require('./chain-explorer.js')
 
 /** Class used to query Insight API */
-class Insight {
+class Insight extends ChainExplorer.ChainExplorer {
   /**
-   * Create a RemoteCalendar.
-   * @param {int} timeout - timeout (in seconds) used for calls to insight servers
+   * Create an Insight-type blockchain explorer.
+   * @param {String} url - Insight-type blockchain explorer url
+   * @param {int} timeout - timeout (in seconds) for calls to the Insight-type explorer
    */
   constructor (url, timeout) {
+    super(url, timeout)
     this.urlBlockindex = url + '/block-index'
     this.urlBlock = url + '/block'
-    this.timeout = timeout * 1000
-
-    // this.urlBlockindex = 'https://search.bitaccess.co/insight-api/block-index';
-    // this.urlBlock = 'https://search.bitaccess.co/insight-api/block';
-    // this.urlBlock = "https://insight.bitpay.com/api/block-index/447669";
   }
 
   /**
@@ -43,175 +39,54 @@ class Insight {
    */
 
   /**
-   * Retrieve the block hash from the block height.
-   * @param {string} height - Height of the block.
+   * Retrieve the block hash by calling an explorer server.
+   * @param {Object} options - The http request options.
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.
    */
-  blockhash (height) {
-    const options = {
-      url: this.urlBlockindex + '/' + height,
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'javascript-opentimestamps',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      json: true,
-      timeout: this.timeout
-    }
-
+  parseBlockhash (options) {
     return new Promise((resolve, reject) => {
-      requestPromise(options)
-        .then(body => {
-          // console.log('body ', body);
-          if (body.size === 0) {
-            console.error('Insight response error body ')
-            reject(new Error('Insight response error body '))
-            return
-          }
-
-          resolve(body.blockHash)
-        })
-        .catch(err => {
-          console.error('Insight response error: ' + err.toString().substr(0, 100))
-          reject(err)
-        })
-    })
+        requestPromise(options)
+          .then(body => {
+            if (body.size === 0) {
+              console.error('Insight response error body ')
+              reject(new Error('Insight response error body '))
+              return
+            }
+            resolve(body.blockHash)
+          })
+          .catch(err => {
+            console.error('Insight response error: ' + err.toString().substr(0, 100))
+            reject(err)
+          })
+      })
   }
 
   /**
-   * Retrieve the block information from the block hash.
-   * @param {string} height - Height of the block.
+   * Retrieve the block information by calling an explorer server.
+   * @param {Object} options - The http request options.
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.
    */
-  block (hash) {
-    const options = {
-      url: this.urlBlock + '/' + hash,
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'javascript-opentimestamps',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      json: true,
-      timeout: this.timeout
-    }
-
+  parseBlockInfo (options) {
     return new Promise((resolve, reject) => {
-      requestPromise(options)
-        .then(body => {
-          // console.log('body ', body);
-          if (!body) {
-            console.error('Insight response error body ')
-            return reject(new Error('Insight response error body '))
-          }
-          if (!body.merkleroot || !body.time) {
-            return reject(new Error('Insight response error body '))
-          }
-          resolve({merkleroot: body.merkleroot, time: body.time})
-        })
-        .catch(err => {
-          console.error('Insight response error: ' + err.toString().substr(0, 100))
-          reject(err)
-        })
-    })
-  }
-}
-
-const publicInsightUrls = {}
-publicInsightUrls.bitcoin = [
-//  'https://www.localbitcoinschain.com/api',  // gives 502 - "lots of HTML code"
-//  'https://search.bitaccess.co/insight-api',   // gives 400 - "Block height out of range. Code:-8"
-  'https://insight.bitpay.com/api',
-  'https://btc-bitcore1.trezor.io/api',
-  'https://btc-bitcore4.trezor.io/api',
-  'https://blockexplorer.com/api',
-  'https://bitcore.schmoock.net/insight-api'
-]
-publicInsightUrls.litecoin = [
-  'https://ltc-bitcore1.trezor.io/api',
-  'https://insight.litecore.io/api'
-]
-
-class MultiInsight {
-  /** Constructor
-   * @param {object} options - Options
-   *    urls: array of insight server urls
-   *    timeout: timeout(in seconds) used for calls to insight servers
-   */
-  constructor (options) {
-    this.insights = []
-
-    // Sets requests timeout (default = 10s)
-    const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout')
-    const timeout = timeoutOptionSet ? options.timeout : 10
-    const chainOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'chain')
-    const chain = chainOptionSet ? options.chain : 'bitcoin'
-
-    // We need at least 2 insight servers (for confirmation)
-    const urlsOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'urls') && options.urls.length > 1
-    const urls = urlsOptionSet ? options.urls : publicInsightUrls[chain]
-
-    urls.forEach(url => {
-      if (typeof (url) !== 'string') {
-        throw new TypeError('URL must be a string')
-      }
-      var i
-      if (url === Blockstream.publicBlockstreamUrls.mainnet || url === Blockstream.publicBlockstreamUrls.testnet ) {
-        i = new Blockstream.BlockstreamExplorer(url, timeout)
-      } else {
-        i = new Insight(url, timeout)
-      }
-      this.insights.push(i)
-    })
-  }
-
-  blockhash (height) {
-    const res = []
-    this.insights.forEach(insight => {
-      res.push(insight.blockhash(height))
-    })
-    return new Promise((resolve, reject) => {
-      Promise.all(res.map(Utils.softFail)).then(results => {
-        // console.log('results=' + results);
-        const set = new Set()
-        results.filter(result => { if (result && !(result instanceof Error)) { set.add(JSON.stringify(result)) } })
-        if (set.size === 0) {
-          reject(new Error('No block height ' + height + 'found'))
-        } else if (set.size === 1) {
-          resolve(JSON.parse(set.values().next().value))
-        } else {
-          reject(new Error('Different block height ' + height + 'found'))
-        }
+        requestPromise(options)
+          .then(body => {
+            if (!body) {
+              console.error('Insight response error body ')
+              return reject(new Error('Insight response error body '))
+            }
+            if (!body.merkleroot || !body.time) {
+              return reject(new Error('Insight response error body '))
+            }
+            resolve({merkleroot: body.merkleroot, time: body.time})
+          })
+          .catch(err => {
+            console.error('Insight response error: ' + err.toString().substr(0, 100))
+            reject(err)
+          })
       })
-    })
-  }
-
-  block (hash) {
-    const res = []
-    this.insights.forEach(insight => {
-      res.push(insight.block(hash))
-    })
-    return new Promise((resolve, reject) => {
-      Promise.all(res.map(Utils.softFail)).then(results => {
-        // console.log('results=' + results);
-        const set = new Set()
-        results.filter(result => { if (result && !(result instanceof Error)) { set.add(JSON.stringify(result)) } })
-        if (set.size === 0) {
-          reject(new Error('No block hash ' + hash + 'found'))
-        } else if (set.size === 1) {
-          resolve(JSON.parse(set.values().next().value))
-        } else {
-          reject(new Error('Different block hash ' + hash + 'found'))
-        }
-      })
-    })
   }
 }
 
-module.exports = {
-  Insight,
-  MultiInsight
-}
+module.exports = { Insight }
