@@ -19,6 +19,24 @@ test('Bitcoin.info()', assert => {
   })
 })
 
+test('Bitcoin.getChain()', assert => {
+  Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
+    // console.log("Bitcoin properties");
+    // console.log(properties);
+    const bitcoin = new Bitcoin.BitcoinNode(properties)
+    bitcoin.getChain().then(json => {
+      assert.true(json !== undefined)            
+      assert.end()
+    }).catch(err => {
+      assert.true('err=' + err)
+      assert.end()
+    })
+  }).catch(err => {
+    assert.true('err=' + err)
+    assert.end()
+  })
+})
+
 test('Bitcoin.getBlockHeader()', assert => {
   Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
     const bitcoin = new Bitcoin.BitcoinNode(properties)
